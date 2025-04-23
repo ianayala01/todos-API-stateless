@@ -9,6 +9,7 @@ const sqlite3 = require('sqlite3').verbose();
 
 // connection to db
 const db = new sqlite3.Database('./todos.db', (err) => {
+  console.log('Database path:', path.resolve('./todos.db'));
   if (err){
     console.error('Error opening database:', err);
   } else{
@@ -33,18 +34,6 @@ app.use(express.json());
 // Middle ware to inlcude static content
 
 app.use(express.static('public'))
-
-// In-memory array to store todo items
-let todos = [
-  {
-  id: 0,
-  name: 'nina',
-  priority: 'high',
-  isComplete: false,
-  isFun: false
-}
-];
-let nextId = 1;
 
 // server index.html
   app.get('/', (req, res) => {
@@ -79,7 +68,7 @@ app.get('/todos/:id', (req, res) => {
 
 // POST a new todo item
 app.post('/todos', (req, res) => {
-  const { name, priority = 'low', isFun } = req.body;
+  const { name, priority = 'low', isFun = false } = req.body;
 
   if (!name) {
     return res.status(400).json({ message: 'Name is required' });
@@ -97,21 +86,10 @@ app.post('/todos', (req, res) => {
         isComplete: false,
         isFun
       };
-      todos.push(newTodo); // only push after a successful insert
       res.status(201).json(newTodo);
     }
   });
 
-
-  const newTodo = {
-    id: nextId++,
-    name,
-    priority,
-    isComplete: false,
-    isFun
-  };
-  
-  todos.push(newTodo);
 });
 
 // DELETE a todo item by ID
@@ -123,7 +101,22 @@ app.delete('/todos/:id', (req, res) => {
     } else if (this.changes === 0) {
       res.status(404).json({ message: 'Todo item not found' });
     } else {
-      res.json({ message: `Todo item ${id} deleted.` });
+      //check if the table is empty
+      db.get('SELECT COUNT(*) AS count FROM todos', [], (err, row) =>{
+        if (err){
+          return res.status(500).json({message: 'Database error', error: err.message})
+        }
+
+        if (row.count ===0){
+          //resets the counter bc it was bothering me
+          db.run('DELETE FROM sqlite_sequence WHERE name = "todos"', [], (err)=> {
+            return res.json({message: `TO item ${id} deleted. ID counter reset.`});
+          })
+        } else {
+          return res.json({message: `Todo item ${id} deleted.`})
+        }
+      })
+      //res.json({ message: `Todo item ${id} deleted.` });
     }
   });
 });
