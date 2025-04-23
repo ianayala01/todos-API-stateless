@@ -5,11 +5,33 @@ const express = require('express');
 const path = require('path')
 const app = express();
 const port = 3000;
+const sqlite3 = require('sqlite3').verbose();
+
+// connection to db
+const db = new sqlite3.Database('./todos.db', (err) => {
+  if (err){
+    console.error('Error opening database:', err);
+  } else{
+    console.log('Connected to SQLite database! :D');
+  }
+})
+
+// create table if doesn't exist already
+db.serialize(() => {
+  db.run(`CREATE TABLE IF NOT EXISTS todos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    priority TEXT,
+    isComplete BOOLEAN,
+    isFun BOOLEAN
+  )`);
+})
 
 // Middleware to parse JSON requests
 app.use(express.json());
 
 // Middle ware to inlcude static content
+
 app.use(express.static('public'))
 
 // In-memory array to store todo items
@@ -25,9 +47,10 @@ let todos = [
 let nextId = 1;
 
 // server index.html
-app.get('/', (req, res) => {
-    res.sendFile('index.html')
-})
+  app.get('/', (req, res) => {
+    console.log('serving index.html');
+      res.sendFile(path.join(__dirname,'public', 'index.html'));
+  })
 
 // GET all todo items
 app.get('/todos', (req, res) => {
