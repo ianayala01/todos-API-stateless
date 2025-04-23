@@ -1,7 +1,7 @@
 /* import fonts or other imports rules */
 
 /* to-do
-1 ) add hover effect to all buttons
+1 ) add hover effect to all buttons ./
 2 ) add a Google font 
 */
 
@@ -37,8 +37,14 @@
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 2px 5px var(--box-shadow);
-    }
+      
     
+    }
+    .gFont {
+        font-family: "Cascadia Mono", sans-serif;
+        font-optical-sizing: auto;
+        font-style: normal;
+      }
     button {
       padding: 10px;
       margin-top: 10px;

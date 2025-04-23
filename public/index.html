@@ -5,12 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Todo App</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cascadia+Mono:ital,wght@0,200..700;1,200..700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="container">
     <!-- Display Todos Button -->
     <div class="block">
-      <button id="displayTodos">Display All Todos</button>
+      <button id="displayTodos" class="gFont">Display All Todos</button>
     </div>
 
     <!-- Add Todo Form -->
@@ -18,13 +21,13 @@
       <input type="text" id="todoName" placeholder="Todo name" required>
       <input type="text" id="todoPriority" placeholder="Priority (default: low)">
       <input type="text" id="todoIsFun" placeholder="Is Fun? (default: true)">
-      <button id="submitTodo">Submit Todo</button>
+      <button id="submitTodo" class="gFont">Submit Todo</button>
     </div>
 
     <!-- Delete Todo Form -->
     <div class="block">
       <input type="number" id="todoIdToDelete" placeholder="Enter ID to delete">
-      <button id="deleteTodo">Delete Todo</button>
+      <button id="deleteTodo" class="gFont">Delete Todo</button>
     </div>
 
     <!-- display items -->
