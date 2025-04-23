@@ -51,17 +51,26 @@
       background-color: var(--display-btn);
       color: white;
     }
+
+    #displayTodos:hover {
+        background-color: #275f29;
+    }
     
     #submitTodo {
       background-color: var(--submit-btn);
       color: white;
     }
     
+    #submitTodo:hover {
+        background-color: #105085;
+    }
     #deleteTodo {
       background-color: var(--delete-btn);
       color: white;
     }
-    
+    #deleteTodo:hover{
+        background-color: #992921;
+    }
     input {
       display: block;
       margin: 5px 0;

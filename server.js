@@ -54,18 +54,27 @@ let nextId = 1;
 
 // GET all todo items
 app.get('/todos', (req, res) => {
-  res.json(todos);
+  db.all('Select * FROM todos', [], (err, rows) => {
+    if (err){
+      res.status(500).json({message: 'Database error', error: err.message});
+    } else{
+      res.json(rows);
+    }
+  })
 });
 
 // GET a specific todo item by ID
 app.get('/todos/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  const todo = todos.find(item => item.id === id);
-  if (todo) {
-    res.json(todo);
-  } else {
-    res.status(404).json({ message: 'Todo item not found' });
-  }
+  const { id } = req.params;
+  db.get('SELECT * FROM todos WHERE id = ?', [id], (err, row) => {
+    if (err) {
+      res.status(500).json({ message: 'Database error', error: err.message });
+    } else if (row) {
+      res.json(row);
+    } else {
+      res.status(404).json({ message: 'Todo item not found' });
+    }
+  })
 });
 
 // POST a new todo item
@@ -76,6 +85,24 @@ app.post('/todos', (req, res) => {
     return res.status(400).json({ message: 'Name is required' });
   }
 
+  const stmt = db.prepare('INSERT INTO todos (name, priority, isComplete, isFun) VALUES (?, ?, ?, ?)');
+  stmt.run(name, priority, false, isFun, function(err) {
+    if (err) {
+      res.status(500).json({ message: 'Database error', error: err.message });
+    } else {
+      const newTodo = {
+        id: this.lastID,
+        name,
+        priority,
+        isComplete: false,
+        isFun
+      };
+      todos.push(newTodo); // only push after a successful insert
+      res.status(201).json(newTodo);
+    }
+  });
+
+
   const newTodo = {
     id: nextId++,
     name,
@@ -85,21 +112,33 @@ app.post('/todos', (req, res) => {
   };
   
   todos.push(newTodo);
-  res.status(201).json(newTodo);
 });
 
 // DELETE a todo item by ID
 app.delete('/todos/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  const index = todos.findIndex(item => item.id === id);
-
-  if (index !== -1) {
-    todos.splice(index, 1);
-    res.json({ message: `Todo item ${id} deleted.` });
-  } else {
-    res.status(404).json({ message: 'Todo item not found' });
-  }
+  const { id } = req.params;
+  db.run('DELETE FROM todos WHERE id = ?', [id], function(err) {
+    if (err) {
+      res.status(500).json({ message: 'Database error', error: err.message });
+    } else if (this.changes === 0) {
+      res.status(404).json({ message: 'Todo item not found' });
+    } else {
+      res.json({ message: `Todo item ${id} deleted.` });
+    }
+  });
 });
+
+//close db on surver shutdown
+process.on('SIGINT', () => {
+  db.close((err) => {
+    if (err) {
+      console.error('Error closing database:', err);
+    } else {
+      console.log('Closed SQLite database');
+    }
+    process.exit(0);
+  })
+})
 
 // Start the server
 app.listen(port, () => {
